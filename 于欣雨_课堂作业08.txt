@@ -1,0 +1,217 @@
+IN存储过程
+MariaDB [0419]> delimiter //
+MariaDB [0419]> CREATE PROCEDURE same_grade(IN p_grade INT)
+    -> BEGIN
+    -> IF p_grade is null or p_grade='' THEN
+    -> SELECT * FROM t_grade;
+    -> ELSE
+    -> SELECT * FROM t_grade WHERE STU_SCORE LIKE p_grade;
+    -> END IF;
+    -> END//
+Query OK, 0 rows affected (0.019 sec)
+
+MariaDB [0419]> delimiter ;
+MariaDB [0419]> CALL same_grade (79);
++--------+-----------+
+| STU_ID | STU_SCORE |
++--------+-----------+
+|   2007 |        79 |
++--------+-----------+
+1 row in set (0.001 sec)
+
+OUT存储
+MariaDB [0419]> delimiter //
+MariaDB [0419]> CREATE PROCEDURE SEARCH2(IN p_age INT,OUT p_int INT)
+    -> BEGIN
+    -> IF p_age is null or p_age='' THEN
+    -> SELECT * FROM t_student;
+    -> ELSE
+    -> SELECT * FROM t_student WHERE STU_AGE LIKE p_age;
+    -> END IF;
+    -> SELECT FOUND_ROWS() INTO p_int;
+    -> END //
+Query OK, 0 rows affected (0.021 sec)
+MariaDB [0419]> delimiter ;
+MariaDB [0419]> CALL SEARCH2(12,@p_num);
++--------+----------+-----------+---------+---------+
+| STU_ID | STU_NAME | STU_CLASS | STU_SEX | STU_AGE |
++--------+----------+-----------+---------+---------+
+|   2000 | 小王     |         1 | 男      |      12 |
+|   2005 | acva     |         2 | 男      |      12 |
+|   2006 | cvsa     |         1 | 女      |      12 |
+|   2008 | 吕g      |         1 | 女      |      12 |
+|   2009 | dfa      |         1 | 男      |      12 |
+|   2010 | sa       |         1 | 女      |      12 |
+|   2011 | et       |         2 | 男      |      12 |
+|   2013 | qwe      |         1 | 女      |      12 |
+|   2014 | hj       |         1 | 女      |      12 |
+|   2017 | fa       |         1 | 女      |      12 |
+|   2019 | yr       |         1 | 男      |      12 |
+|   2021 | oph      |         1 | 男      |      12 |
+|   2345 | gg       |         2 | 女      |      12 |
++--------+----------+-----------+---------+---------+
+13 rows in set (0.001 sec)
+
+Query OK, 1 row affected (0.082 sec)
+
+MariaDB [0419]> SELECT @p_num;
++--------+
+| @p_num |
++--------+
+|     13 |
++--------+
+1 row in set (0.000 sec)
+
+INOUT存储
+MariaDB [0419]> delimiter //
+MariaDB [0419]> CREATE PROCEDURE pingfang(INOUT p_num INT)
+    -> BEGIN
+    -> SET p_num=p_num*p_num;
+    -> END //
+Query OK, 0 rows affected (0.022 sec)
+MariaDB [0419]> delimiter ;
+MariaDB [0419]> SET @p_num=12;
+Query OK, 0 rows affected (0.000 sec)
+
+MariaDB [0419]> call pingfang(@p_num);
+Query OK, 0 rows affected (0.003 sec)
+
+MariaDB [0419]> SELECT @p_num;
++--------+
+| @p_num |
++--------+
+|    144 |
++--------+
+1 row in set (0.000 sec)
+
+条件
+MariaDB [0419]> delimiter //
+MariaDB [0419]> CREATE PROCEDURE s_sex(IN p_sex char(20))
+    -> BEGIN
+    -> IF p_sex ='男' THEN
+    -> SELECT * FROM t_student WHERE STU_SEX='男';
+    -> ELSEIF p_sex ='女' THEN
+    -> SELECT * FROM t_student WHERE STU_SEX='女';
+    -> ELSE
+    -> SELECT * FROM t__student;
+    -> END IF;
+    -> END //
+Query OK, 0 rows affected (0.025 sec)
+
+MariaDB [0419]> delimiter ;
+MariaDB [0419]> CALL s_sex('女');
++--------+----------+-----------+---------+---------+
+| STU_ID | STU_NAME | STU_CLASS | STU_SEX | STU_AGE |
++--------+----------+-----------+---------+---------+
+|   1234 | 寺       |         3 | 女      |      23 |
+|   1344 | 寺       |        45 | 女      |      23 |
+|   2004 | efa      |         1 | 女      |       4 |
+|   2006 | cvsa     |         1 | 女      |      12 |
+|   2007 | csa      |         1 | 女      |      10 |
+|   2008 | 吕g      |         1 | 女      |      12 |
+|   2010 | sa       |         1 | 女      |      12 |
+|   2013 | qwe      |         1 | 女      |      12 |
+|   2014 | hj       |         1 | 女      |      12 |
+|   2017 | fa       |         1 | 女      |      12 |
+|   2020 | uk       |         1 | 女      |       5 |
+|   2345 | gg       |         2 | 女      |      12 |
++--------+----------+-----------+---------+---------+
+12 rows in set (0.001 sec)
+
+循环
+MariaDB [0419]> delimiter //
+MariaDB [0419]> CREATE PROCEDURE sumhe(IN p_num INT, IN p_result INT)
+    -> BEGIN
+    -> WHILE p_num>0  DO
+    -> SELECT * FROM t_grade WHERE STU_SCORE LIKE p_result;
+    -> SET p_num=p_num-1;
+    -> END WHILE;
+    -> END //
+Query OK, 0 rows affected (0.026 sec)
+
+MariaDB [0419]> delimiter ;
+MariaDB [0419]> CALL sumhe(2,90);
++--------+-----------+
+| STU_ID | STU_SCORE |
++--------+-----------+
+|   2004 |        90 |
+|   2008 |        90 |
+|   2012 |        90 |
++--------+-----------+
+3 rows in set (0.003 sec)
+
+函数
+MariaDB [0419]> delimiter //
+MariaDB [0419]> CREATE FUNCTION chengji(p_num1 INT,p_num2 INT)
+    -> RETURNS INT
+    -> BEGIN
+    -> RETURN (p_num1*p_num2);
+    -> END //
+Query OK, 0 rows affected (0.025 sec)
+
+MariaDB [0419]> delimiter ;
+MariaDB [0419]> SET @p_num1=55;
+Query OK, 0 rows affected (0.000 sec)
+
+MariaDB [0419]> SET @p_num2=102;
+Query OK, 0 rows affected (0.000 sec)
+
+MariaDB [0419]> SELECT chengji(@p_num1,@p_num2);
++--------------------------+
+| chengji(@p_num1,@p_num2) |
++--------------------------+
+|                     5610 |
++--------------------------+
+1 row in set (0.001 sec)
+
+触发器
+MariaDB [0419]> CREATE TABLE account (acct_num INT, amount DECIMAL(10,2));
+Query OK, 0 rows affected (0.086 sec)
+
+MariaDB [0419]> INSERT INTO account VALUES(137,14.98),(141,1937.50),(97,-100.00);
+Query OK, 3 rows affected (0.009 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MariaDB [0419]> delimiter //
+MariaDB [0419]> CREATE TRIGGER upd_check BEFORE UPDATE ON account
+    -> FOR EACH ROW
+    -> BEGIN
+    -> IF NEW.amount < 0 THEN
+    -> SET NEW.amount = 0;
+    -> ELSEIF NEW.amount > 100 THEN
+    -> SET NEW.amount = 100;
+    -> END IF;
+    -> END//
+Query OK, 0 rows affected (0.034 sec)
+MariaDB [0419]> update account set amount=-10 where acct_num=137;
+    -> //
+Query OK, 1 row affected (0.013 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+MariaDB [0419]> select * from account;
+    -> //
++----------+---------+
+| acct_num | amount  |
++----------+---------+
+|      137 |    0.00 |
+|      141 | 1937.50 |
+|       97 | -100.00 |
++----------+---------+
+3 rows in set (0.000 sec)
+MariaDB [0419]> update account set amount=200 where acct_num=137//
+Query OK, 1 row affected (0.011 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+MariaDB [0419]> update account set amount=200 where acct_num=137//
+Query OK, 1 row affected (0.011 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [0419]>  select * from account//
++----------+---------+
+| acct_num | amount  |
++----------+---------+
+|      137 |  100.00 |
+|      141 | 1937.50 |
+|       97 | -100.00 |
++----------+---------+
+3 rows in set (0.000 sec)
+
+
